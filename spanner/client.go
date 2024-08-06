@@ -19,6 +19,7 @@ package spanner
 import (
 	"context"
 	"fmt"
+	"go.opentelemetry.io/otel/metric/noop"
 	"io"
 	"log"
 	"os"
@@ -111,6 +112,7 @@ type Client struct {
 	disableRouteToLeader bool
 	dro                  *sppb.DirectedReadOptions
 	otConfig             *openTelemetryConfig
+	metricsTracerFactory *builtinMetricsTracerFactory
 }
 
 // DatabaseName returns the full name of a database, e.g.,
@@ -122,6 +124,40 @@ func (c *Client) DatabaseName() string {
 // ClientID returns the id of the Client. This is not recommended for customer applications and used internally for testing.
 func (c *Client) ClientID() string {
 	return c.sc.id
+}
+
+func (c *Client) newBuiltinMetricsTracer(ctx context.Context, isStreaming bool) *BuiltinMetricsTracer {
+	mt := c.metricsTracerFactory.createBuiltinMetricsTracer(ctx, isStreaming)
+	ctx = context.WithValue(ctx, ContextKeyBuiltInMetricsTracer, &mt)
+	return &mt
+}
+
+// recordOperationCompletion records as many operation specific metrics as it can
+// Ignores error seen while creating metric attributes since metric can still
+// be recorded with rest of the attributes
+func recordOperationCompletion(mt *BuiltinMetricsTracer) {
+	if !mt.builtInEnabled {
+		return
+	}
+
+	// Calculate elapsed time
+	elapsedTimeMs := convertToMs(time.Since(mt.currOp.startTime))
+
+	// Record operation_count
+	opCntAttrs, _ := mt.toOtelMetricAttrs(metricNameOperationCount)
+	mt.instrumentOperationCount.Add(mt.ctx, 1, metric.WithAttributes(opCntAttrs...))
+
+	// Record operation_latencies
+	opLatAttrs, _ := mt.toOtelMetricAttrs(metricNameOperationLatencies)
+	mt.instrumentOperationLatencies.Record(mt.ctx, elapsedTimeMs, metric.WithAttributes(opLatAttrs...))
+
+	// Record attempt_count
+	attemptCntAttrs, _ := mt.toOtelMetricAttrs(metricNameAttemptCount)
+	if mt.currOp.attemptCount > 1 {
+		// Only record when retry count is greater than 0 so the retry
+		// graph will be less confusing
+		mt.instrumentAttemptCount.Add(mt.ctx, mt.currOp.attemptCount-1, metric.WithAttributes(attemptCntAttrs...))
+	}
 }
 
 func createGCPMultiEndpoint(cfg *grpcgcp.GCPMultiEndpointOptions, config ClientConfig, opts ...option.ClientOption) (*grpcgcp.GCPMultiEndpoint, error) {
@@ -469,6 +505,18 @@ func newClientWithConfig(ctx context.Context, database string, config ClientConf
 		return nil, err
 	}
 
+	metricsProvider := otConfig.meterProvider
+	if emulatorAddr := os.Getenv("SPANNER_EMULATOR_HOST"); emulatorAddr != "" {
+		// Do not emit metrics when emulator is being used
+		metricsProvider = noop.NewMeterProvider()
+	}
+
+	// Create a OpenTelemetry metrics configuration
+	metricsTracerFactory, err := newBuiltinMetricsTracerFactory(ctx, database, metricsProvider)
+	if err != nil {
+		return nil, err
+	}
+
 	c = &Client{
 		sc:                   sc,
 		idleSessions:         sp,
@@ -482,6 +530,7 @@ func newClientWithConfig(ctx context.Context, database string, config ClientConf
 		disableRouteToLeader: config.DisableRouteToLeader,
 		dro:                  config.DirectedReadOptions,
 		otConfig:             otConfig,
+		metricsTracerFactory: metricsTracerFactory,
 	}
 	return c, nil
 }
@@ -570,6 +619,9 @@ func getQueryOptions(opts QueryOptions) QueryOptions {
 
 // Close closes the client.
 func (c *Client) Close() {
+	if c.metricsTracerFactory != nil {
+		c.metricsTracerFactory.shutdown()
+	}
 	if c.idleSessions != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -932,6 +984,9 @@ func ApplyCommitOptions(co CommitOptions) ApplyOption {
 
 // Apply applies a list of mutations atomically to the database.
 func (c *Client) Apply(ctx context.Context, ms []*Mutation, opts ...ApplyOption) (commitTimestamp time.Time, err error) {
+	mt := c.newBuiltinMetricsTracer(ctx, false)
+	defer recordOperationCompletion(mt)
+
 	ao := &applyOption{}
 
 	for _, opt := range c.ao {

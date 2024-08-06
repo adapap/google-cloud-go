@@ -852,12 +852,11 @@ func (c *restClient) Connection() *grpc.ClientConn {
 }
 func (c *gRPCClient) CreateSession(ctx context.Context, req *spannerpb.CreateSessionRequest, opts ...gax.CallOption) (*spannerpb.Session, error) {
 	hds := []string{"x-goog-request-params", fmt.Sprintf("%s=%v", "database", url.QueryEscape(req.GetDatabase()))}
-
 	hds = append(c.xGoogHeaders, hds...)
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).CreateSession[0:len((*c.CallOptions).CreateSession):len((*c.CallOptions).CreateSession)], opts...)
 	var resp *spannerpb.Session
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+	err := gaxInvokeWithRecorder(ctx, "CreateSession", func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.client.CreateSession(ctx, req, settings.GRPC...)
 		return err
@@ -1079,7 +1078,7 @@ func (c *gRPCClient) Commit(ctx context.Context, req *spannerpb.CommitRequest, o
 	ctx = gax.InsertMetadataIntoOutgoingContext(ctx, hds...)
 	opts = append((*c.CallOptions).Commit[0:len((*c.CallOptions).Commit):len((*c.CallOptions).Commit)], opts...)
 	var resp *spannerpb.CommitResponse
-	err := gax.Invoke(ctx, func(ctx context.Context, settings gax.CallSettings) error {
+	err := gaxInvokeWithRecorder(ctx, "Commit", func(ctx context.Context, settings gax.CallSettings) error {
 		var err error
 		resp, err = c.client.Commit(ctx, req, settings.GRPC...)
 		return err

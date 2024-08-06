@@ -14,7 +14,12 @@
 
 package spanner
 
-import "google.golang.org/api/option"
+import (
+	"cloud.google.com/go/spanner"
+	"context"
+	"github.com/googleapis/gax-go/v2"
+	"google.golang.org/api/option"
+)
 
 // Returns the default client options used by the generated Spanner client.
 //
@@ -22,4 +27,19 @@ import "google.golang.org/api/option"
 // removed at any time without any warning.
 func DefaultClientOptions() []option.ClientOption {
 	return defaultGRPCClientOptions()
+}
+
+// gaxInvokeWithRecorder:
+// - wraps 'f' in a new function 'callWrapper' that:
+//   - updates tracer state and records built in attempt specific metrics
+//   - does not return errors seen while recording the metrics
+//
+// - then, calls gax.Invoke with 'callWrapper' as an argument
+func gaxInvokeWithRecorder(ctx context.Context, method string,
+	f func(ctx context.Context, _ gax.CallSettings) error, opts ...gax.CallOption) error {
+	mt, ok := ctx.Value(spanner.ContextKeyBuiltInMetricsTracer).(*spanner.BuiltinMetricsTracer)
+	if !ok {
+		return gax.Invoke(ctx, f, opts...)
+	}
+	return gax.Invoke(ctx, mt.GetCallWrapper(method, f), opts...)
 }
