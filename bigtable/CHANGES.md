@@ -1,5 +1,12 @@
 # Changes
 
+## [1.29.1](https://github.com/googleapis/google-cloud-go/compare/bigtable/v1.29.0...bigtable/v1.29.1) (2024-08-21)
+
+
+### Bug Fixes
+
+* **bigtable:** Use new auth library ([#10670](https://github.com/googleapis/google-cloud-go/issues/10670)) ([fab520d](https://github.com/googleapis/google-cloud-go/commit/fab520d226340bbf1aedc001dcb7384651e075a0))
+
 ## [1.29.0](https://github.com/googleapis/google-cloud-go/compare/bigtable/v1.28.0...bigtable/v1.29.0) (2024-08-09)
 
 
