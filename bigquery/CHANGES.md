@@ -3,6 +3,30 @@
 
 
 
+## [1.63.0](https://github.com/googleapis/google-cloud-go/compare/bigquery/v1.62.0...bigquery/v1.63.0) (2024-08-21)
+
+
+### Features
+
+* **bigquery/migration:** Update MS API stubs with Unified API ([1bb4c84](https://github.com/googleapis/google-cloud-go/commit/1bb4c846ec1ff37f394afb1684823ea76c18d16e))
+* **bigquery:** Add support for Go 1.23 iterators ([84461c0](https://github.com/googleapis/google-cloud-go/commit/84461c0ba464ec2f951987ba60030e37c8a8fc18))
+
+
+### Bug Fixes
+
+* **bigquery:** ProcessStream check ctx done when queuing non retryable err ([#10675](https://github.com/googleapis/google-cloud-go/issues/10675)) ([60ad7f3](https://github.com/googleapis/google-cloud-go/commit/60ad7f32d69ed3986fb1326841bba2c5dc36e508))
+* **bigquery:** Remove retry on FailedPrecondition ([#10671](https://github.com/googleapis/google-cloud-go/issues/10671)) ([ab9a961](https://github.com/googleapis/google-cloud-go/commit/ab9a9610c2542e956a0edbffbadcaef588028dfa))
+* **bigquery:** Update dependencies ([257c40b](https://github.com/googleapis/google-cloud-go/commit/257c40bd6d7e59730017cf32bda8823d7a232758))
+* **bigquery:** Update google.golang.org/api to v0.191.0 ([5b32644](https://github.com/googleapis/google-cloud-go/commit/5b32644eb82eb6bd6021f80b4fad471c60fb9d73))
+
+
+### Documentation
+
+* **bigquery/datatransfer:** Deprecate `authorization_code` ([84461c0](https://github.com/googleapis/google-cloud-go/commit/84461c0ba464ec2f951987ba60030e37c8a8fc18))
+* **bigquery/migration:** A comment for field `name` in message `.google.cloud.bigquery.migration.v2.MigrationWorkflow` is changed to include 'Identifier' ([1bb4c84](https://github.com/googleapis/google-cloud-go/commit/1bb4c846ec1ff37f394afb1684823ea76c18d16e))
+* **bigquery/migration:** A comment for field `translation_config_details` in message `.google.cloud.bigquery.migration.v2.MigrationTask` is changed ([1bb4c84](https://github.com/googleapis/google-cloud-go/commit/1bb4c846ec1ff37f394afb1684823ea76c18d16e))
+* **bigquery/migration:** A comment for field `type` in message `.google.cloud.bigquery.migration.v2.MigrationTask` is changed to include new supported types ([1bb4c84](https://github.com/googleapis/google-cloud-go/commit/1bb4c846ec1ff37f394afb1684823ea76c18d16e))
+
 ## [1.62.0](https://github.com/googleapis/google-cloud-go/compare/bigquery/v1.61.0...bigquery/v1.62.0) (2024-07-22)
 
 
