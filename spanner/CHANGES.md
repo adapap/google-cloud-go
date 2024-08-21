@@ -1,5 +1,19 @@
 # Changes
 
+## [1.68.0](https://github.com/googleapis/google-cloud-go/compare/spanner/v1.67.0...spanner/v1.68.0) (2024-08-21)
+
+
+### Features
+
+* **spanner:** Add support for Go 1.23 iterators ([84461c0](https://github.com/googleapis/google-cloud-go/commit/84461c0ba464ec2f951987ba60030e37c8a8fc18))
+
+
+### Bug Fixes
+
+* **spanner:** Ensure defers run at the right time in tests ([#9759](https://github.com/googleapis/google-cloud-go/issues/9759)) ([7ef0ded](https://github.com/googleapis/google-cloud-go/commit/7ef0ded2502dbb37f07bc93bc2e868e29f7121c4))
+* **spanner:** Json null handling ([#10660](https://github.com/googleapis/google-cloud-go/issues/10660)) ([4c519e3](https://github.com/googleapis/google-cloud-go/commit/4c519e37a124defc3451adfdbd0883a5e081eb2f))
+* **spanner:** Wait for things to complete ([#10095](https://github.com/googleapis/google-cloud-go/issues/10095)) ([7785cad](https://github.com/googleapis/google-cloud-go/commit/7785cad89effbc8c4e67043368f96d4768cdb40f))
+
 ## [1.67.0](https://github.com/googleapis/google-cloud-go/compare/spanner/v1.66.0...spanner/v1.67.0) (2024-08-15)
 
 
